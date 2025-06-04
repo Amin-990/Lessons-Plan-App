@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson Plan</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-primary {
+            background-image: linear-gradient(to right, #2563eb, #4f46e5);
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-image: linear-gradient(to right, #1d4ed8, #4338ca);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-secondary {
+            background-image: linear-gradient(to right, #f59e0b, #d97706);
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-secondary:hover {
+            background-image: linear-gradient(to right, #d97706, #b45309);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-tertiary {
+            background-image: linear-gradient(to right, #14b8a6, #0d9488);
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-tertiary:hover {
+            background-image: linear-gradient(to right, #0d9488, #0f766e);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-success {
+            background-image: linear-gradient(to right, #10b981, #059669);
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-success:hover {
+            background-image: linear-gradient(to right, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn-font-size {
+            background-color: #6b7280;
+            color: white;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-font-size:hover {
+            background-color: #4b5563;
+        }
+        .loading-spinner {
+            border-top-color: #fff;
+            border-left-color: #fff;
+            border-bottom-color: transparent;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message-box {
+            animation: fadeinout 3s forwards;
+        }
+        @keyframes fadeinout {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .hide-btn {
+            background-color: #ef4444; /* Red color for hide button */
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px; /* Full rounded */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600; /* font-semibold */
+            transition: background-color 0.2s ease-in-out;
+        }
+        .hide-btn:hover {
+            background-color: #dc2626; /* Darker red on hover */
+        }
+        .highlight-btn {
+            background-color: #ef4444; /* Red color for highlighted text */
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600; /* font-semibold */
+            display: inline-block; /* To allow padding and margin */
+            margin-bottom: 0.5rem; /* mb-2 */
+            margin-left: 0.5rem; /* ml-2 for RTL */
+            white-space: nowrap; /* Prevent text from wrapping inside the button */
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-2xl transform transition-all duration-300 hover:scale-[1.01]">
+        <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">Lesson Plan</h1>
+
+        <!-- Main Content Section (always visible) -->
+        <div>
+            <!-- Image Upload Section (always visible) -->
+            <div id="uploadSection" class="mb-6">
+                <label for="imageUpload" class="block text-gray-700 text-sm font-semibold mb-2">
+                    کتاب کے صفحے کی تصویر منتخب کریں:
+                </label>
+                <input
+                    type="file"
+                    id="imageUpload"
+                    accept="image/*"
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                />
+            </div>
+
+            <!-- Image Preview -->
+            <div id="imagePreviewContainer" class="mt-4 mb-6 flex justify-center hidden">
+                <img id="imagePreview" alt="تصویر کا پیش نظارہ" class="max-h-64 rounded-lg shadow-md border border-gray-200 object-contain" />
+            </div>
+
+            <!-- Action Buttons for Gemini API -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <button
+                    id="generateLessonPlanBtn"
+                    disabled
+                    class="w-full btn-primary text-white py-3 px-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-lg font-bold shadow-lg"
+                >
+                    <span id="generateLessonPlanBtnText">سبق کا منصوبہ بنائیں ✨</span>
+                    <svg id="lessonPlanLoadingSpinner" class="hidden animate-spin -ml-1 mr-3 h-5 w-5 loading-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+
+                <button
+                    id="generateSummaryBtn"
+                    disabled
+                    class="w-full btn-secondary text-white py-3 px-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-lg font-bold shadow-lg"
+                >
+                    <span id="generateSummaryBtnText">خلاصہ بنائیں ✨</span>
+                    <svg id="summaryLoadingSpinner" class="hidden animate-spin -ml-1 mr-3 h-5 w-5 loading-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+
+                <button
+                    id="generateQuizBtn"
+                    disabled
+                    class="w-full btn-tertiary text-white py-3 px-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed text-lg font-bold shadow-lg"
+                >
+                    <span id="generateQuizBtnText">سوالات بنائیں ✨</span>
+                    <svg id="quizLoadingSpinner" class="hidden animate-spin -ml-1 mr-3 h-5 w-5 loading-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-center border border-red-300 hidden"></div>
+
+            <!-- Lesson Plan Display -->
+            <div id="lessonPlanContainer" class="mt-8 bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800 text-center flex-grow">تیار شدہ سبق کا منصوبہ</h2>
+                    <button id="hideLessonPlanBtn" class="hide-btn">چھپائیں</button>
+                </div>
+                <!-- Font Size Controls -->
+                <div class="flex justify-center mb-4 space-x-2 space-x-reverse">
+                    <button id="increaseFontBtn" class="btn-font-size py-1 px-4 rounded-full text-sm font-semibold">
+                        لکھائی بڑی کریں
+                    </button>
+                    <button id="decreaseFontBtn" class="btn-font-size py-1 px-4 rounded-full text-sm font-semibold">
+                        لکھائی چھوٹی کریں
+                    </button>
+                </div>
+                <div id="lessonPlanDisplay" class="whitespace-pre-wrap text-gray-700 leading-relaxed text-lg" style="font-family: 'Inter', sans-serif;">
+                    <!-- Lesson plan content will be inserted here -->
+                </div>
+                <button
+                    id="copyLessonPlanBtn"
+                    class="mt-6 w-full btn-success text-white py-2 px-4 rounded-xl text-base font-semibold shadow-md"
+                >
+                    کلپ بورڈ پر کاپی کریں
+                </button>
+                <p id="lessonPlanCopyMessage" class="mt-2 text-center text-green-700 text-sm hidden"></p>
+            </div>
+
+            <!-- Summary Display -->
+            <div id="summaryContainer" class="mt-8 bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800 text-center flex-grow">تیار شدہ خلاصہ</h2>
+                    <button id="hideSummaryBtn" class="hide-btn">چھپائیں</button>
+                </div>
+                <!-- Font Size Controls for Summary -->
+                <div class="flex justify-center mb-4 space-x-2 space-x-reverse">
+                    <button id="increaseSummaryFontBtn" class="btn-font-size py-1 px-4 rounded-full text-sm font-semibold">
+                        لکھائی بڑی کریں
+                    </button>
+                    <button id="decreaseSummaryFontBtn" class="btn-font-size py-1 px-4 rounded-full text-sm font-semibold">
+                        لکھائی چھوٹی کریں
+                    </button>
+                </div>
+                <div id="summaryDisplay" class="whitespace-pre-wrap text-gray-700 leading-relaxed text-lg" style="font-family: 'Inter', sans-serif;">
+                    <!-- Summary content will be inserted here -->
+                </div>
+                <button
+                    id="copySummaryBtn"
+                    class="mt-6 w-full btn-success text-white py-2 px-4 rounded-xl text-base font-semibold shadow-md"
+                >
+                    کلپ بورڈ پر کاپی کریں
+                </button>
+                <p id="summaryCopyMessage" class="mt-2 text-center text-green-700 text-sm hidden"></p>
+            </div>
+
+            <!-- Quiz Questions Display -->
+            <div id="quizContainer" class="mt-8 bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800 text-center flex-grow">تیار شدہ سوالات</h2>
+                    <button id="hideQuizBtn" class="hide-btn">چھپائیں</button>
+                </div>
+                <!-- Font Size Controls for Quiz -->
+                <div class="flex justify-center mb-4 space-x-2 space-x-reverse">
+                    <button id="increaseQuizFontBtn" class="btn-font-size py-1 px-4 rounded-full text-sm font-semibold">
+                        لکھائی بڑی کریں
+                    </button>
+                    <button id="decreaseQuizFontBtn" class="btn-font-size py-1 px-4 rounded-full text-sm font-semibold">
+                        لکھائی چھوٹی کریں
+                    </button>
+                </div>
+                <div id="quizDisplay" class="whitespace-pre-wrap text-gray-700 leading-relaxed text-lg" style="font-family: 'Inter', sans-serif;">
+                    <!-- Quiz questions will be inserted here -->
+                </div>
+                <button
+                    id="copyQuizBtn"
+                    class="mt-6 w-full btn-success text-white py-2 px-4 rounded-xl text-base font-semibold shadow-md"
+                >
+                    کلپ بورڈ پر کاپی کریں
+                </button>
+                <p id="quizCopyMessage" class="mt-2 text-center text-green-700 text-sm hidden"></p>
+            </div>
+        </div>
+
+        <!-- Design Credit -->
+        <div class="mt-8 text-center text-gray-600 text-sm">
+            Design by Qari Fazli Amin Mashwani
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let app;
+        let db;
+        let auth;
+        let currentUserId = null;
+        let currentFontSize = 18;
+
+        const imageUploadInput = document.getElementById('imageUpload');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+
+        const generateLessonPlanBtn = document.getElementById('generateLessonPlanBtn');
+        const generateLessonPlanBtnText = document.getElementById('generateLessonPlanBtnText');
+        const lessonPlanLoadingSpinner = document.getElementById('lessonPlanLoadingSpinner');
+
+        const generateSummaryBtn = document.getElementById('generateSummaryBtn');
+        const generateSummaryBtnText = document.getElementById('generateSummaryBtnText');
+        const summaryLoadingSpinner = document.getElementById('summaryLoadingSpinner');
+
+        const generateQuizBtn = document.getElementById('generateQuizBtn');
+        const generateQuizBtnText = document.getElementById('generateQuizBtnText');
+        const quizLoadingSpinner = document.getElementById('quizLoadingSpinner');
+
+        const errorMessageDiv = document.getElementById('errorMessage');
+
+        const lessonPlanContainer = document.getElementById('lessonPlanContainer');
+        const lessonPlanDisplay = document.getElementById('lessonPlanDisplay');
+        const copyLessonPlanBtn = document.getElementById('copyLessonPlanBtn');
+        const lessonPlanCopyMessage = document.getElementById('lessonPlanCopyMessage');
+        const hideLessonPlanBtn = document.getElementById('hideLessonPlanBtn');
+
+        const summaryContainer = document.getElementById('summaryContainer');
+        const summaryDisplay = document.getElementById('summaryDisplay');
+        const copySummaryBtn = document.getElementById('copySummaryBtn');
+        const summaryCopyMessage = document.getElementById('summaryCopyMessage');
+        const hideSummaryBtn = document.getElementById('hideSummaryBtn');
+        const increaseSummaryFontBtn = document.getElementById('increaseSummaryFontBtn');
+        const decreaseSummaryFontBtn = document.getElementById('decreaseSummaryFontBtn');
+
+        const quizContainer = document.getElementById('quizContainer');
+        const quizDisplay = document.getElementById('quizDisplay');
+        const copyQuizBtn = document.getElementById('copyQuizBtn');
+        const quizCopyMessage = document.getElementById('quizCopyMessage');
+        const hideQuizBtn = document.getElementById('hideQuizBtn');
+        const increaseQuizFontBtn = document.getElementById('increaseQuizFontBtn');
+        const decreaseQuizFontBtn = document.getElementById('decreaseQuizFontBtn');
+
+        const increaseFontBtn = document.getElementById('increaseFontBtn');
+        const decreaseFontBtn = document.getElementById('decreaseFontBtn');
+
+        window.onload = async () => {
+            try {
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                const userCredential = await signInAnonymously(auth);
+                currentUserId = userCredential.user.uid;
+                console.log("صارف گمنام طور پر سائن ان ہے:", currentUserId);
+
+                updateGenerateButtonsState();
+                lessonPlanDisplay.style.fontSize = `${currentFontSize}px`;
+                summaryDisplay.style.fontSize = `${currentFontSize}px`;
+                quizDisplay.style.fontSize = `${currentFontSize}px`;
+            } catch (err) {
+                console.error("فائر بیس شروع کرنے میں خرابی:", err);
+                displayError("ایپ شروع کرنے میں خرابی۔ براہ کرم دوبارہ کوشش کریں۔");
+            }
+        };
+
+        function updateGenerateButtonsState() {
+            const isDisabled = !window.selectedImage;
+            generateLessonPlanBtn.disabled = isDisabled;
+            generateSummaryBtn.disabled = isDisabled;
+            generateQuizBtn.disabled = isDisabled;
+        }
+
+        function displayError(message) {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.classList.remove('hidden');
+        }
+
+        function clearError() {
+            errorMessageDiv.textContent = '';
+            errorMessageDiv.classList.add('hidden');
+        }
+
+        function showCopyMessage(message, messageElement) {
+            messageElement.textContent = message;
+            messageElement.classList.remove('hidden');
+            setTimeout(() => {
+                messageElement.classList.add('hidden');
+                messageElement.textContent = '';
+            }, 3000);
+        }
+
+        imageUploadInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                window.selectedImage = file;
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    imagePreview.src = reader.result;
+                    imagePreviewContainer.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+                updateGenerateButtonsState();
+                clearError();
+                lessonPlanContainer.classList.add('hidden');
+                lessonPlanDisplay.textContent = '';
+                summaryContainer.classList.add('hidden');
+                summaryDisplay.textContent = '';
+                quizContainer.classList.add('hidden');
+                quizDisplay.textContent = '';
+            } else {
+                window.selectedImage = null;
+                imagePreviewContainer.classList.add('hidden');
+                imagePreview.src = '';
+                updateGenerateButtonsState();
+            }
+        });
+
+        function getBase64Image(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = (error) => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function callGeminiAPI(prompt, imageFile, loadingTextElement, spinnerElement, displayElement, containerElement, copyMessageElement, firestoreCollectionName, postProcessFunction = null) {
+            if (!imageFile) {
+                displayError('براہ کرم ایک تصویر منتخب کریں۔');
+                return;
+            }
+
+            loadingTextElement.textContent = 'تیار ہو رہا ہے...';
+            spinnerElement.classList.remove('hidden');
+            clearError();
+            containerElement.classList.add('hidden');
+            displayElement.textContent = '';
+
+            try {
+                const base64ImageData = await getBase64Image(imageFile);
+                let chatHistory = [];
+                chatHistory.push({
+                    role: "user",
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: imageFile.type,
+                                data: base64ImageData,
+                            },
+                        },
+                    ],
+                });
+
+                const payload = { contents: chatHistory };
+                
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    let generatedText = result.candidates[0].content.parts[0].text;
+                    
+                    if (postProcessFunction) {
+                        generatedText = postProcessFunction(generatedText);
+                    }
+
+                    displayElement.innerHTML = generatedText;
+                    containerElement.classList.remove('hidden');
+
+                    if (db && currentUserId) {
+                        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                        const collectionRef = collection(db, `/artifacts/${appId}/users/${currentUserId}/${firestoreCollectionName}`);
+                        await addDoc(collectionRef, {
+                            timestamp: serverTimestamp(),
+                            imageName: imageFile.name,
+                            generatedContent: generatedText,
+                            userType: 'anonymous'
+                        });
+                    } else {
+                        console.warn("Firestore میں محفوظ نہیں کیا جا سکا: DB یا صارف ID دستیاب نہیں ہے۔");
+                    }
+                } else {
+                    displayError('مواد بنانے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔');
+                    console.error("API رسپونس کی ساخت غیر متوقع ہے:", result);
+                }
+            } catch (err) {
+                displayError('مواد بنانے میں خرابی: ' + err.message);
+                console.error("API کال میں خرابی:", err);
+            } finally {
+                loadingTextElement.textContent = loadingTextElement.originalText;
+                spinnerElement.classList.add('hidden');
+                updateGenerateButtonsState();
+            }
+        }
+
+        generateLessonPlanBtnText.originalText = generateLessonPlanBtnText.textContent;
+        generateSummaryBtnText.originalText = generateSummaryBtnText.textContent;
+        generateQuizBtnText.originalText = generateQuizBtnText.textContent;
+
+        function postProcessLessonPlan(text) {
+            text = text.replace(/استاد کیا پڑھائے گا/g, '<span class="highlight-btn">استاد کیا پڑھائے گا</span>');
+            text = text.replace(/کیسے پڑھائے گا/g, '<span class="highlight-btn">کیسے پڑھائے گا</span>');
+            text = text.replace(/کیوں پڑھائے گا/g, '<span class="highlight-btn">کیوں پڑھائے گا</span>');
+            return text;
+        }
+
+        function postProcessSummary(text) {
+            text = text.replace(/خلاصہ(:)?/g, '<span class="highlight-btn">خلاصہ</span>');
+            return text;
+        }
+
+        function postProcessQuiz(text) {
+            text = text.replace(/سوال نمبر (\d+)/g, '<span class="highlight-btn">سوال نمبر $1</span>');
+            return text;
+        }
+
+        generateLessonPlanBtn.addEventListener('click', async () => {
+            const prompt = `اس تصویر میں موجود مواد کی بنیاد پر ایک مختصر سبق کا منصوبہ (lesson plan) تیار کریں۔ سبق کے منصوبے میں صرف مندرجہ ذیل تین نکات شامل ہوں: استاد کیا پڑھائے گا، کیسے پڑھائے گا، کیوں پڑھائے گا. یہ منصوبہ اردو میں ہونا چاہیے اور ہر نکتے کو مختصر اور واضح طور پر بیان کیا جائے۔`;
+            await callGeminiAPI(
+                prompt,
+                window.selectedImage,
+                generateLessonPlanBtnText,
+                lessonPlanLoadingSpinner,
+                lessonPlanDisplay,
+                lessonPlanContainer,
+                lessonPlanCopyMessage,
+                'lesson_plans',
+                postProcessLessonPlan
+            );
+        });
+
+        generateSummaryBtn.addEventListener('click', async () => {
+            const prompt = `اس تصویر میں موجود مواد کا ایک مختصر اور جامع خلاصہ (summary) تیار کریں۔ یہ خلاصہ اردو میں ہونا چاہیے اور اس کے شروع میں صرف "خلاصہ" کا لفظ استعمال کریں۔`;
+            await callGeminiAPI(
+                prompt,
+                window.selectedImage,
+                generateSummaryBtnText,
+                summaryLoadingSpinner,
+                summaryDisplay,
+                summaryContainer,
+                summaryCopyMessage,
+                'summaries',
+                postProcessSummary
+            );
+        });
+
+        generateQuizBtn.addEventListener('click', async () => {
+            const prompt = `اس تصویر میں موجود مواد کی بنیاد پر 3 مختصر جواب والے سوالات تیار کریں اور ہر سوال کے ساتھ اس کا مختصر جواب بھی اردو میں فراہم کریں۔ سوالات اور جوابات کو واضح طور پر الگ الگ کریں۔ ہر سوال کو "سوال نمبر 1" سے شروع کریں اور جواب کو "جواب:" سے شروع کریں۔`;
+            await callGeminiAPI(
+                prompt,
+                window.selectedImage,
+                generateQuizBtnText,
+                quizLoadingSpinner,
+                quizDisplay,
+                quizContainer,
+                quizCopyMessage,
+                'quiz_questions',
+                postProcessQuiz
+            );
+        });
+
+        copyLessonPlanBtn.addEventListener('click', () => {
+            if (lessonPlanDisplay.textContent) {
+                const textarea = document.createElement('textarea');
+                textarea.value = lessonPlanDisplay.textContent;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showCopyMessage('سبق کا منصوبہ کلپ بورڈ پر کاپی کر لیا گیا ہے!', lessonPlanCopyMessage);
+            }
+        });
+
+        copySummaryBtn.addEventListener('click', () => {
+            if (summaryDisplay.textContent) {
+                const textarea = document.createElement('textarea');
+                textarea.value = summaryDisplay.textContent;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showCopyMessage('خلاصہ کلپ بورڈ پر کاپی کر لیا گیا ہے!', summaryCopyMessage);
+            }
+        });
+
+        copyQuizBtn.addEventListener('click', () => {
+            if (quizDisplay.textContent) {
+                const textarea = document.createElement('textarea');
+                textarea.value = quizDisplay.textContent;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showCopyMessage('سوالات کلپ بورڈ پر کاپی کر لیے گئے ہیں!', quizCopyMessage);
+            }
+        });
+
+        increaseFontBtn.addEventListener('click', () => {
+            currentFontSize = Math.min(currentFontSize + 2, 30);
+            lessonPlanDisplay.style.fontSize = `${currentFontSize}px`;
+        });
+
+        decreaseFontBtn.addEventListener('click', () => {
+            currentFontSize = Math.max(currentFontSize - 2, 12);
+            lessonPlanDisplay.style.fontSize = `${currentFontSize}px`;
+        });
+
+        increaseSummaryFontBtn.addEventListener('click', () => {
+            currentFontSize = Math.min(currentFontSize + 2, 30);
+            summaryDisplay.style.fontSize = `${currentFontSize}px`;
+        });
+
+        decreaseSummaryFontBtn.addEventListener('click', () => {
+            currentFontSize = Math.max(currentFontSize - 2, 12);
+            summaryDisplay.style.fontSize = `${currentFontSize}px`;
+        });
+
+        increaseQuizFontBtn.addEventListener('click', () => {
+            currentFontSize = Math.min(currentFontSize + 2, 30);
+            quizDisplay.style.fontSize = `${currentFontSize}px`;
+        });
+
+        decreaseQuizFontBtn.addEventListener('click', () => {
+            currentFontSize = Math.max(currentFontSize - 2, 12);
+            quizDisplay.style.fontSize = `${currentFontSize}px`;
+        });
+
+        hideLessonPlanBtn.addEventListener('click', () => {
+            lessonPlanContainer.classList.toggle('hidden');
+        });
+
+        hideSummaryBtn.addEventListener('click', () => {
+            summaryContainer.classList.toggle('hidden');
+        });
+
+        hideQuizBtn.addEventListener('click', () => {
+            quizContainer.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>
